@@ -16,6 +16,17 @@ from app.models import (
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
+NOT_FOUND_RESPONSE = {
+    404: {
+        "description": "Task not found",
+        "content": {
+            "application/json": {
+                "example": {"detail": "Task not found"}
+            }
+        },
+    }
+}
+
 
 def _task_to_read(task: Task) -> TaskRead:
     """Convert a Task DB object to a TaskRead response model."""
@@ -85,7 +96,7 @@ def list_tasks(
 
 
 # GET /tasks/{id} — Get a single task by ID, return 404 if not found or soft-deleted
-@router.get("/{task_id}")
+@router.get("/{task_id}", responses=NOT_FOUND_RESPONSE)
 def get_task(task_id: int, session: SessionDep) -> TaskRead:
     task = session.get(Task, task_id)
     if not task or task.deleted_at is not None:
@@ -94,7 +105,7 @@ def get_task(task_id: int, session: SessionDep) -> TaskRead:
 
 
 # PATCH /tasks/{id} — Partial update, only modify fields provided in request body
-@router.patch("/{task_id}")
+@router.patch("/{task_id}", responses=NOT_FOUND_RESPONSE)
 def update_task(task_id: int, task_data: TaskUpdate, session: SessionDep) -> TaskRead:
     task = session.get(Task, task_id)
     if not task or task.deleted_at is not None:
@@ -122,7 +133,7 @@ def update_task(task_id: int, task_data: TaskUpdate, session: SessionDep) -> Tas
 
 
 # DELETE /tasks/{id} — Soft delete by setting deleted_at timestamp
-@router.delete("/{task_id}", status_code=204)
+@router.delete("/{task_id}", status_code=204, responses=NOT_FOUND_RESPONSE)
 def delete_task(task_id: int, session: SessionDep) -> None:
     task = session.get(Task, task_id)
     if not task or task.deleted_at is not None:
