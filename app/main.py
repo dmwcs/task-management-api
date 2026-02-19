@@ -24,5 +24,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-SQLModel.metadata.create_all(engine)
-print("Database connected and tables created")
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
+    print("Database connected and tables created")
