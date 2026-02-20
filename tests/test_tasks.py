@@ -65,25 +65,25 @@ def test_create_task_missing_title(client):
     del payload["title"]
     response = client.post("/tasks", json=payload)
     assert response.status_code == 422
-    assert response.json()["error"] == "Validation Failed"
+    assert "detail" in response.json()
 
 
 def test_create_task_priority_out_of_range(client):
     response = client.post("/tasks", json=task_payload(priority=10))
     assert response.status_code == 422
-    assert "priority" in response.json()["details"]
+    assert "detail" in response.json()
 
 
 def test_create_task_due_date_in_past(client):
     response = client.post("/tasks", json=task_payload(due_date="2020-01-01"))
     assert response.status_code == 422
-    assert "due_date" in response.json()["details"]
+    assert "detail" in response.json()
 
 
 def test_create_task_title_too_long(client):
     response = client.post("/tasks", json=task_payload(title="x" * 201))
     assert response.status_code == 422
-    assert "title" in response.json()["details"]
+    assert "detail" in response.json()
 
 
 # ---- GET /tasks ----

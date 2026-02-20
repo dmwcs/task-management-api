@@ -111,20 +111,25 @@ def update_task(task_id: int, task_data: TaskUpdate, session: SessionDep) -> Tas
     if not task or task.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Task not found")
 
+    # Only include fields that were explicitly provided in the request (partial update)
     update_data = task_data.model_dump(exclude_unset=True)
 
-    for key, value in update_data.items():
-        if key == "tags":
-            task.tags.clear()
-            for tag_name in value:
-                tag = session.exec(select(Tag).where(Tag.name == tag_name)).first()
-                if not tag:
-                    tag = Tag(name=tag_name)
-                    session.add(tag)
-                task.tags.append(tag)
-        else:
-            setattr(task, key, value)
+    # Handle tags separately
+    if "tags" in update_data:
+        tag_names = update_data.pop("tags")
+        task.tags.clear()
+        for tag_name in tag_names:
+            tag = session.exec(select(Tag).where(Tag.name == tag_name)).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                session.add(tag)
+            task.tags.append(tag)
 
+    # Handle all other fields
+    for key, value in update_data.items():
+        setattr(task, key, value)
+
+    # Handle timestamp fields
     task.updated_at = datetime.now()
     session.add(task)
     session.commit()
