@@ -17,6 +17,12 @@ A RESTful Task Management API built with FastAPI, SQLModel, and PostgreSQL. Supp
 
 - Docker and Docker Compose installed
 
+### Setup
+
+```bash
+cp .env.example .env
+```
+
 ### Run with Docker (single command)
 
 ```bash
@@ -41,7 +47,7 @@ http://localhost:8000/docs
 uv run pytest tests/ -v
 ```
 
-Tests use an in-memory SQLite database and do not require PostgreSQL to be running.
+Tests use an in-memory SQLite database and do not require PostgreSQL to be running. The test suite uses FastAPI's `TestClient`, which is built on top of `httpx` under the hood, to simulate HTTP requests without starting a real server.
 
 ## API Endpoints
 
@@ -128,7 +134,7 @@ Indexes are applied to frequently filtered columns:
 
 ## Production Readiness Improvements
 
-My primary background is in Node.js/TypeScript, and I have limited experience with FastAPI and Python's backend ecosystem. I spent about two hours ramping up on FastAPI, SQLModel, and Python's tooling before building this project. I found that FastAPI is very similar to Express in how it handles routing, middleware, and dependency injection. If anything in this codebase doesn't quite follow Python best practices, I'd love to hear feedback. I didn't have time to explore every Python-specific package in depth, but based on my experience with Express, here are some improvements I'd make for a production environment:
+My primary background is in Node.js/TypeScript, and I have limited experience with FastAPI. However, the core concepts (routing, middleware, dependency injection) are very similar to Express, so the improvements below are based on my Express experience. If anything doesn't quite follow FastAPI conventions, I'm happy to take feedback.
 
 1. **Database Migrations:** Replace `create_all()` with a proper migration tool to support incremental, version-controlled schema changes, similar to how I would use Prisma Migrate or Knex migrations in Node.js.
 
